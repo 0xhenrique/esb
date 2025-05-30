@@ -148,8 +148,7 @@
 (defun esb-edit-bookmark ()
   "Edit description of an existing bookmark."
   (interactive)
-  (let* ((bookmarks (esb--get-bookmarks))
-         (urls (esb--bookmark-urls)))
+  (let* ((urls (esb--bookmark-urls)))
     (if (null urls)
         (message "No bookmarks found")
       (let* ((selected-url (completing-read "Edit bookmark: " urls nil t))
