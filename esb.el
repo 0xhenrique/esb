@@ -1,5 +1,13 @@
 ;;; esb.el --- Emacs Simple Bookmark -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2025 Henrique Marques
+
+;; Author: Henrique Marques <hm2030master@proton.me>
+;; URL: https://github.com/0xhenrique/esb
+;; Version: 0.1
+;; Package-Requires: ((emacs "27.1"))
+;; SPDX-License-Identifier: AGPL-3.0-or-later
+
 ;;; Commentary:
 ;; This is a simple encrypted bookmark manager for Emacs that
 ;; stores bookmarks in an encrypted file suitable for syncing via Git.
@@ -12,7 +20,7 @@
 (require 'json)
 
 (defgroup esb nil
-  "Encrypted bookmark manager."
+  "Emacs Simple Bookmark."
   :group 'tools)
 
 (defcustom esb-bookmarks-file "~/.bookmarks.gpg"

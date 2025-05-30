@@ -212,6 +212,7 @@ The encrypted file is just a simple JSON array:
 * License
 
 This is a simple encrypted bookmark manager for Emacs that stores bookmarks in an encrypted file suitable for syncing via Git. It uses GPG encryption to keep your bookmarks secure while allowing you to store them in public repositories.
+
 Copyright (C) 2025 0xhenrique
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
