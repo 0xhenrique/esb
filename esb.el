@@ -84,6 +84,7 @@
 
 ;;; Interactive functions
 
+;;;###autoload
 (defun esb-add-bookmark (url &optional description)
   "Add a new bookmark with URL and optional DESCRIPTION."
   (interactive "sBookmark URL: \nsDescription (optional): ")
@@ -98,6 +99,7 @@
         (esb--save-if-dirty)
         (message "Added bookmark: %s" url)))))
 
+;;;###autoload
 (defun esb-delete-bookmark ()
   "Delete a bookmark by selecting from list."
   (interactive)
@@ -114,6 +116,7 @@
         (esb--save-if-dirty)
         (message "Deleted bookmark: %s" selected-url)))))
 
+;;;###autoload
 (defun esb-list-bookmarks ()
   "Display all bookmarks in a buffer."
   (interactive)
@@ -130,6 +133,7 @@
               (princ (format "  %s\n" desc)))
             (princ "\n")))))))
 
+;;;###autoload
 (defun esb-select-bookmark ()
   "Select a bookmark and copy URL to clipboard."
   (interactive)
@@ -140,6 +144,7 @@
         (kill-new selected-url)
         (message "Copied to clipboard: %s" selected-url)))))
 
+;;;###autoload
 (defun esb-edit-bookmark ()
   "Edit description of an existing bookmark."
   (interactive)
@@ -156,6 +161,7 @@
         (esb--save-if-dirty)
         (message "Updated bookmark: %s" selected-url)))))
 
+;;;###autoload
 (defun esb-reload-bookmarks ()
   "Reload bookmarks from file (useful after git pull)."
   (interactive)
@@ -164,6 +170,7 @@
   (esb--get-bookmarks)
   (message "Bookmarks reloaded from %s" esb-bookmarks-file))
 
+;;;###autoload
 (defun esb-initialize ()
   "Initialize bookmark file if it doesn't exist."
   (interactive)
@@ -172,24 +179,15 @@
     (esb--write-bookmarks '())
     (message "Initialized empty bookmark file at: %s" esb-bookmarks-file)))
 
-;;; Key bindings
 
-(defvar esb-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c b s") 'esb-select-bookmark)
-    (define-key map (kbd "C-c b a") 'esb-add-bookmark)
-    (define-key map (kbd "C-c b d") 'esb-delete-bookmark)
-    (define-key map (kbd "C-c b l") 'esb-list-bookmarks)
-    (define-key map (kbd "C-c b e") 'esb-edit-bookmark)
-    (define-key map (kbd "C-c b r") 'esb-reload-bookmarks)
-    (define-key map (kbd "C-c b i") 'esb-initialize)
-    map)
-  "Keymap for esb bookmark commands.")
 
+;;;###autoload
 (define-minor-mode esb-mode
-  "Minor mode for encrypted bookmark management."
+  "Minor mode for encrypted bookmark management.
+This mode provides no key bindings by default.
+Users should define their own key bindings for ESB functions."
   :global t
-  :keymap esb-mode-map)
+  :group 'esb)
 
 (provide 'esb)
 

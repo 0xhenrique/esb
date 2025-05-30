@@ -6,6 +6,8 @@
 
 This is a simple encrypted bookmark manager for Emacs that stores bookmarks in an encrypted file suitable for syncing via Git. It uses GPG encryption to keep your bookmarks secure while allowing you to store them in public repositories.
 
+This README has become quite extensive, but I hope it addresses most of the doubts that may arise regarding its usage or potential issues that may occur. Nonetheless, please do not hesitate to open an issue if you encounter any problems. Pull requests are always welcome as well.
+
 * Features
 
 - Encrypted bookmark storage using GPG
@@ -34,7 +36,7 @@ Choose the following options:
 1. RSA and RSA (default)
 2. 4096 bits (recommended for long-term use)
 3. Key validity (0 = no expiration, or set as preferred)
-4. Enter your real name and email address
+4. Enter name and email address
 5. Set a strong passphrase
 
 *** Verify if your key was created
@@ -48,14 +50,30 @@ gpg --list-secret-keys --keyid-format LONG
 Add to your Emacs configuration:
 
 #+BEGIN_SRC elisp
-;; Load esb.el
+;; Load esb.el (if not installing via package manager)
 (load-file "~/path/to/esb.el")
-
-;; Enable esb-mode globally
-(esb-mode 1)
 
 ;; Optional: customize bookmark file location
 (setq esb-bookmarks-file "~/bookmarks/bookmarks.gpg")
+
+;; Optional: enable global minor mode (doesn't bind keys by default)
+(esb-mode 1)
+#+END_SRC
+
+*** Key Binding Setup
+
+ESB doesn't define any global key bindings by default to avoid conflicts. You need to define your own key bindings.
+
+**** Recommended key bindings
+#+BEGIN_SRC elisp
+;; My personal recommendation - follows Emacs conventions
+(global-set-key (kbd "C-c C-b s") 'esb-select-bookmark)
+(global-set-key (kbd "C-c C-b a") 'esb-add-bookmark)
+(global-set-key (kbd "C-c C-b d") 'esb-delete-bookmark)
+(global-set-key (kbd "C-c C-b l") 'esb-list-bookmarks)
+(global-set-key (kbd "C-c C-b e") 'esb-edit-bookmark)
+(global-set-key (kbd "C-c C-b r") 'esb-reload-bookmarks)
+(global-set-key (kbd "C-c C-b i") 'esb-initialize)
 #+END_SRC
 
 ** 3. Git Repository Setup
@@ -75,7 +93,7 @@ echo "*.bak" >> .gitignore
 
 # Initial commit
 git add .gitignore
-git commit -m "Initial commit"
+git commit -m "your commit message"
 #+END_SRC
 
 *** Connect to GitHub
@@ -95,24 +113,29 @@ Update your Emacs config to point to the git repository:
 
 * Usage
 
-** Key bindings
-- ~C-c b s~ - Select bookmark (copy URL to clipboard)
-- ~C-c b a~ - Add new bookmark
-- ~C-c b d~ - Delete bookmark
-- ~C-c b l~ - List all bookmarks
-- ~C-c b e~ - Edit bookmark description
-- ~C-c b r~ - Reload bookmarks from file
-- ~C-c b i~ - Initialize empty bookmark file
+** Available Functions
 
-** Interactive functions
-All functions can also be called via ~M-x~:
-- ~esb-select-bookmark~
-- ~esb-add-bookmark~
-- ~esb-delete-bookmark~
-- ~esb-list-bookmarks~
-- ~esb-edit-bookmark~
-- ~esb-reload-bookmarks~
-- ~esb-initialize~
+All functions are autoloaded and can be called via ~M-x~:
+
+- ~esb-select-bookmark~ - Select bookmark and copy URL to clipboard
+- ~esb-add-bookmark~ - Add new bookmark with URL and optional description
+- ~esb-delete-bookmark~ - Delete bookmark by selection
+- ~esb-list-bookmarks~ - Display all bookmarks in a buffer
+- ~esb-edit-bookmark~ - Edit bookmark description
+- ~esb-reload-bookmarks~ - Reload bookmarks from file (after git pull)
+- ~esb-initialize~ - Initialize empty bookmark file
+
+** Key Binding Reference
+
+Using the recommended key bindings:
+
+- ~C-c C-b s~ - Select bookmark (copy URL to clipboard)
+- ~C-c C-b a~ - Add new bookmark  
+- ~C-c C-b d~ - Delete bookmark
+- ~C-c C-b l~ - List all bookmarks
+- ~C-c C-b e~ - Edit bookmark description
+- ~C-c C-b r~ - Reload bookmarks from file
+- ~C-c C-b i~ - Initialize empty bookmark file
 
 ** Basic workflow
 
@@ -120,11 +143,6 @@ All functions can also be called via ~M-x~:
 1. ~M-x esb-initialize~ - Create empty encrypted bookmark file
 2. ~M-x esb-add-bookmark~ - Add your first bookmark
 3. Commit and push to GitHub
-
-*** Daily usage
-1. ~C-c b s~ - Quick bookmark selection
-2. ~C-c b a~ - Add new bookmarks
-3. Periodically commit and push changes
 
 *** Syncing across machines
 #+BEGIN_SRC bash
@@ -136,7 +154,7 @@ M-x esb-reload-bookmarks
 
 # After making changes: commit and push
 git add bookmarks.gpg
-git commit -m "Update bookmarks"
+git commit -m "your message" 
 git push
 #+END_SRC
 
@@ -146,7 +164,7 @@ git push
 #+BEGIN_SRC bash
 # After adding bookmarks in Emacs
 git add bookmarks.gpg
-git commit -m "Add new bookmarks"
+git commit -m "add new bookmarks, etc..."
 git push
 #+END_SRC
 
@@ -177,8 +195,6 @@ Note: GPG files can't be automatically merged, so avoid simultaneous edits when 
 - Never commit your GPG private key to the repository
 - Regularly backup your GPG keys!
 
-* Troubleshooting
-
 * Configuration Options
 
 ** Customizable Variables
@@ -208,6 +224,19 @@ The encrypted file is just a simple JSON array:
   }
 ]
 #+END_SRC
+
+* Troubleshooting
+
+** Key Binding Conflicts
+If you encounter key binding conflicts:
+1. Check what's currently bound: ~C-h k [key-sequence]~
+2. Choose different keys for ESB functions
+3. Use ~global-set-key~ to define exactly what you want
+
+** GPG Issues
+- Ensure GPG is properly configured and your key is available
+- Check that ~epa-file~ is working: try opening any ~.gpg~ file
+- Verify GPG agent is running if using GUI Emacs
 
 * License
 
