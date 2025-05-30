@@ -1,0 +1,221 @@
+#+TITLE: Emacs Simple Bookmark
+#+AUTHOR: 0xhenrique
+#+DATE: 2025
+
+* Overview
+
+This is a simple encrypted bookmark manager for Emacs that stores bookmarks in an encrypted file suitable for syncing via Git. It uses GPG encryption to keep your bookmarks secure while allowing you to store them in public repositories.
+
+* Features
+
+- Encrypted bookmark storage using GPG
+- Simple JSON format for easy parsing
+- Git-friendly for syncing across machines
+- Built-in Emacs integration
+- No external dependencies beyond GPG
+
+* Installation and Setup
+
+** 1. GPG Configuration
+
+*** Check if GPG is installed
+#+BEGIN_SRC bash
+gpg --version
+#+END_SRC
+
+If GPG is not installed... Install it!
+
+*** Generate a GPG key (if you don't have one)
+#+BEGIN_SRC bash
+gpg --full-generate-key
+#+END_SRC
+
+Choose the following options:
+1. RSA and RSA (default)
+2. 4096 bits (recommended for long-term use)
+3. Key validity (0 = no expiration, or set as preferred)
+4. Enter your real name and email address
+5. Set a strong passphrase
+
+*** Verify if your key was created
+#+BEGIN_SRC bash
+gpg --list-secret-keys --keyid-format LONG
+#+END_SRC
+
+** 2. Emacs Configuration
+
+*** Basic setup
+Add to your Emacs configuration:
+
+#+BEGIN_SRC elisp
+;; Load esb.el
+(load-file "~/path/to/esb.el")
+
+;; Enable esb-mode globally
+(esb-mode 1)
+
+;; Optional: customize bookmark file location
+(setq esb-bookmarks-file "~/bookmarks/bookmarks.gpg")
+#+END_SRC
+
+** 3. Git Repository Setup
+
+*** Initialize bookmark repository
+#+BEGIN_SRC bash
+# Create directory for bookmarks
+mkdir ~/bookmarks
+cd ~/bookmarks
+
+# Initialize git repository
+git init
+
+# Create .gitignore (optional - exclude temporary files)
+echo "*~" > .gitignore
+echo "*.bak" >> .gitignore
+
+# Initial commit
+git add .gitignore
+git commit -m "Initial commit"
+#+END_SRC
+
+*** Connect to GitHub
+#+BEGIN_SRC bash
+# Create repository on GitHub (or any provider you prefer) first, then:
+git remote add origin git@github.com:yourusername/bookmarks.git
+
+# Push initial commit
+git push -u origin master
+#+END_SRC
+
+*** Configure bookmark file path
+Update your Emacs config to point to the git repository:
+#+BEGIN_SRC elisp
+(setq esb-bookmarks-file "~/bookmarks/bookmarks.gpg")
+#+END_SRC
+
+* Usage
+
+** Key bindings
+- ~C-c b s~ - Select bookmark (copy URL to clipboard)
+- ~C-c b a~ - Add new bookmark
+- ~C-c b d~ - Delete bookmark
+- ~C-c b l~ - List all bookmarks
+- ~C-c b e~ - Edit bookmark description
+- ~C-c b r~ - Reload bookmarks from file
+- ~C-c b i~ - Initialize empty bookmark file
+
+** Interactive functions
+All functions can also be called via ~M-x~:
+- ~esb-select-bookmark~
+- ~esb-add-bookmark~
+- ~esb-delete-bookmark~
+- ~esb-list-bookmarks~
+- ~esb-edit-bookmark~
+- ~esb-reload-bookmarks~
+- ~esb-initialize~
+
+** Basic workflow
+
+*** First time setup
+1. ~M-x esb-initialize~ - Create empty encrypted bookmark file
+2. ~M-x esb-add-bookmark~ - Add your first bookmark
+3. Commit and push to GitHub
+
+*** Daily usage
+1. ~C-c b s~ - Quick bookmark selection
+2. ~C-c b a~ - Add new bookmarks
+3. Periodically commit and push changes
+
+*** Syncing across machines
+#+BEGIN_SRC bash
+# Pull latest bookmarks
+git pull
+
+# In Emacs: reload bookmarks
+M-x esb-reload-bookmarks
+
+# After making changes: commit and push
+git add bookmarks.gpg
+git commit -m "Update bookmarks"
+git push
+#+END_SRC
+
+* Git Workflow
+
+** Adding bookmarks
+#+BEGIN_SRC bash
+# After adding bookmarks in Emacs
+git add bookmarks.gpg
+git commit -m "Add new bookmarks"
+git push
+#+END_SRC
+
+** Syncing on different machines
+#+BEGIN_SRC bash
+# Pull latest changes
+git pull
+
+# Reload in Emacs
+M-x esb-reload-bookmarks
+#+END_SRC
+
+Note: GPG files can't be automatically merged, so avoid simultaneous edits when possible.
+
+* Security Considerations
+
+** GPG Key Management
+- Keep your private key secure and backed up (VERY IMPORTANT!)
+- Use a strong passphrase for your GPG key
+- Consider setting key expiration dates
+- The same GPG key must be available on all machines where you use bookmarks
+
+** Repository Security
+- Your encrypted bookmark file is safe to store in public repositories
+- The repository only contains the encrypted file, not plaintext bookmarks
+
+** Best Practices
+- Never commit your GPG private key to the repository
+- Regularly backup your GPG keys!
+
+* Troubleshooting
+
+* Configuration Options
+
+** Customizable Variables
+#+BEGIN_SRC elisp
+;; Bookmark file location
+(setq esb-bookmarks-file "~/path/to/bookmarks.gpg")
+
+;; GPG program path (if needed)
+(setq epg-gpg-program "/usr/local/bin/gpg")
+
+;; Cache passphrase (security vs convenience trade-off)
+(setq epa-file-cache-passphrase-for-symmetric-encryption t)
+#+END_SRC
+
+* File Format
+
+The encrypted file is just a simple JSON array:
+#+BEGIN_SRC json
+[
+  {
+    "url": "https://example.com",
+    "description": "Example website"
+  },
+  {
+    "url": "https://github.com",
+    "description": null
+  }
+]
+#+END_SRC
+
+* License
+
+This is a simple encrypted bookmark manager for Emacs that stores bookmarks in an encrypted file suitable for syncing via Git. It uses GPG encryption to keep your bookmarks secure while allowing you to store them in public repositories.
+Copyright (C) 2025 0xhenrique
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
