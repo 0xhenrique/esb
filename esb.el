@@ -74,7 +74,7 @@
   "Normalize TAGS input to a list of strings."
   (cond
    ((null tags) nil)
-   ((stringp tags) 
+   ((stringp tags)
     (if (string-empty-p tags)
         nil
       (mapcar #'string-trim (split-string tags "[,[:space:]]+" t))))
@@ -203,11 +203,11 @@
 ;;;###autoload
 (defun esb-add-bookmark (url &optional description tags)
   "Add a new bookmark with URL, optional DESCRIPTION and TAGS."
-  (interactive 
+  (interactive
    (let ((url (read-string "Bookmark URL: "))
          (description (read-string "Description (optional): "))
          (tags (read-string "Tags (comma-separated, optional): ")))
-     (list url 
+     (list url
            (if (string-empty-p description) nil description)
            tags)))
   
@@ -226,8 +226,8 @@
     (setq esb-bookmarks-cache (append bookmarks (list new-bookmark)))
     (setq esb-cache-dirty t)
     (esb--save-if-dirty)
-    (message "Added bookmark: %s%s" 
-             url 
+    (message "Added bookmark: %s%s"
+             url
              (if normalized-tags (format " [%s]" (string-join normalized-tags ", ")) ""))))
 
 ;;;###autoload
@@ -261,7 +261,7 @@
 ;;;###autoload
 (defun esb-list-bookmarks (&optional tag)
   "Display all bookmarks in a buffer, optionally filtered by TAG."
-  (interactive 
+  (interactive
    (when current-prefix-arg
      (list (completing-read "Filter by tag: " (esb--get-all-tags) nil t))))
   
@@ -335,7 +335,7 @@
            (current-desc (or (alist-get 'description bookmark) ""))
            (current-tags (alist-get 'tags bookmark))
            (new-desc (read-string "Description: " current-desc))
-           (new-tags-str (read-string "Tags (comma-separated): " 
+           (new-tags-str (read-string "Tags (comma-separated): "
                                      (if current-tags (string-join current-tags ", ") "")))
            (new-tags (esb--normalize-tags new-tags-str)))
       
@@ -356,7 +356,7 @@
         (princ "Available tags:\n\n")
         (dolist (tag (sort tags #'string<))
           (let ((count (length (esb--filter-bookmarks-by-tag tag))))
-            (princ (format "• %s (%d bookmark%s)\n" 
+            (princ (format "• %s (%d bookmark%s)\n"
                           tag count (if (= count 1) "" "s")))))))))
 
 ;;;###autoload
