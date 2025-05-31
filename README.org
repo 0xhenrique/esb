@@ -10,11 +10,13 @@ This README has become quite extensive, but I hope it addresses most of the doub
 
 * Features
 
-- Encrypted bookmark storage using GPG
-- Simple JSON format for easy parsing
-- Git-friendly for syncing across machines
+- Encrypted bookmark storage using GPG (with plain text option)
+- Simple JSON format
+- Git-friendly
 - Built-in Emacs integration
-- No external dependencies beyond GPG
+- Tag support
+- Filtering by tags
+- No external dependencies beyond GPG (you probably already have that)
 
 * Installation and Setup
 
@@ -56,22 +58,22 @@ Add to your Emacs configuration:
 ;; Optional: customize bookmark file location
 (setq esb-bookmarks-file "~/bookmarks/bookmarks.gpg")
 
-;; Optional: enable global minor mode (doesn't bind keys by default)
-(esb-mode 1)
+;; Optional: use plain text instead of GPG encryption
+;; (setq esb-storage-backend 'plain)
 #+END_SRC
 
 *** Key Binding Setup
 
 ESB doesn't define any global key bindings by default to avoid conflicts. You need to define your own key bindings.
 
-**** Recommended key bindings
+**** Key bindings I use
 #+BEGIN_SRC elisp
-;; My personal recommendation - follows Emacs conventions
 (global-set-key (kbd "C-c C-b s") 'esb-select-bookmark)
 (global-set-key (kbd "C-c C-b a") 'esb-add-bookmark)
 (global-set-key (kbd "C-c C-b d") 'esb-delete-bookmark)
 (global-set-key (kbd "C-c C-b l") 'esb-list-bookmarks)
 (global-set-key (kbd "C-c C-b e") 'esb-edit-bookmark)
+(global-set-key (kbd "C-c C-b t") 'esb-list-tags)
 (global-set-key (kbd "C-c C-b r") 'esb-reload-bookmarks)
 (global-set-key (kbd "C-c C-b i") 'esb-initialize)
 #+END_SRC
@@ -117,32 +119,42 @@ Update your Emacs config to point to the git repository:
 
 All functions are autoloaded and can be called via ~M-x~:
 
-- ~esb-select-bookmark~ - Select bookmark and copy URL to clipboard
-- ~esb-add-bookmark~ - Add new bookmark with URL and optional description
+- ~esb-select-bookmark~ - Select bookmark and copy URL to clipboard (prefix arg to filter by tag)
+- ~esb-add-bookmark~ - Add new bookmark with URL, description and tags are optional
 - ~esb-delete-bookmark~ - Delete bookmark by selection
-- ~esb-list-bookmarks~ - Display all bookmarks in a buffer
-- ~esb-edit-bookmark~ - Edit bookmark description
+- ~esb-list-bookmarks~ - Display all bookmarks in a buffer (prefix arg to filter by tag)
+- ~esb-edit-bookmark~ - Edit bookmark description and tags
+- ~esb-list-tags~ - Display all available tags with bookmark counts
 - ~esb-reload-bookmarks~ - Reload bookmarks from file (after git pull)
 - ~esb-initialize~ - Initialize empty bookmark file
 
-** Key Binding Reference
+** Tag Usage
 
-Using the recommended key bindings:
+*** Adding tags
+When adding bookmarks, you can specify tags as comma-separated values:
+- Single tag: ~work~
+- Multiple tags: ~work, api, reference~
+- Tags with spaces: ~machine learning, data science~
 
-- ~C-c C-b s~ - Select bookmark (copy URL to clipboard)
-- ~C-c C-b a~ - Add new bookmark  
-- ~C-c C-b d~ - Delete bookmark
-- ~C-c C-b l~ - List all bookmarks
-- ~C-c C-b e~ - Edit bookmark description
-- ~C-c C-b r~ - Reload bookmarks from file
-- ~C-c C-b i~ - Initialize empty bookmark file
+*** Filtering by tags
+Use prefix argument (C-u) with list and select functions:
+- ~C-u C-c C-b l~ - List bookmarks filtered by tag
+- ~C-u C-c C-b s~ - Select bookmark filtered by tag
 
 ** Basic workflow
 
 *** First time setup
 1. ~M-x esb-initialize~ - Create empty encrypted bookmark file
-2. ~M-x esb-add-bookmark~ - Add your first bookmark
+2. ~M-x esb-add-bookmark~ - Add your first bookmark with tags
 3. Commit and push to GitHub
+
+*** Adding bookmarks with tags
+#+BEGIN_EXAMPLE
+M-x esb-add-bookmark
+Bookmark URL: https://api.github.com
+Description (optional): GitHub API Documentation
+Tags (comma-separated, optional): work, api, reference
+#+END_EXAMPLE
 
 *** Syncing across machines
 #+BEGIN_SRC bash
@@ -183,8 +195,7 @@ Note: GPG files can't be automatically merged, so avoid simultaneous edits when 
 
 ** GPG Key Management
 - Keep your private key secure and backed up (VERY IMPORTANT!)
-- Use a strong passphrase for your GPG key
-- Consider setting key expiration dates
+- Use a strong passphrase for your GPG key (you can cache it)
 - The same GPG key must be available on all machines where you use bookmarks
 
 ** Repository Security
@@ -192,8 +203,8 @@ Note: GPG files can't be automatically merged, so avoid simultaneous edits when 
 - The repository only contains the encrypted file, not plaintext bookmarks
 
 ** Best Practices
-- Never commit your GPG private key to the repository
-- Regularly backup your GPG keys!
+- Never commit your GPG private key to the repository (ALSO VERY IMPORTANT!)
+- Regularly backup your GPG keys! (ALSO VERY IMPORTANT!)
 
 * Configuration Options
 
@@ -202,11 +213,28 @@ Note: GPG files can't be automatically merged, so avoid simultaneous edits when 
 ;; Bookmark file location
 (setq esb-bookmarks-file "~/path/to/bookmarks.gpg")
 
+;; Storage backend (gpg, plain, or custom function)
+(setq esb-storage-backend 'gpg)  ; default: GPG encrypted
+;; (setq esb-storage-backend 'plain)  ; plain text
+
 ;; GPG program path (if needed)
 (setq epg-gpg-program "/usr/local/bin/gpg")
 
-;; Cache passphrase (security vs convenience trade-off)
+;; Cache passphrase
 (setq epa-file-cache-passphrase-for-symmetric-encryption t)
+#+END_SRC
+
+** Storage Backends
+
+*** GPG (default)
+Stores bookmarks in GPG-encrypted files, suitable for public repositories like Github.
+
+*** Plain Text
+Stores bookmarks in plain JSON files. Useful for local-only usage or when GPG is not available.
+
+#+BEGIN_SRC elisp
+(setq esb-storage-backend 'plain)
+(setq esb-bookmarks-file "~/bookmarks/bookmarks.json")
 #+END_SRC
 
 * File Format
@@ -216,11 +244,18 @@ The encrypted file is just a simple JSON array:
 [
   {
     "url": "https://example.com",
-    "description": "Example website"
+    "description": "Example website",
+    "tags": ["work", "reference"]
   },
   {
     "url": "https://github.com",
-    "description": null
+    "description": null,
+    "tags": ["code", "git"]
+  },
+  {
+    "url": "https://api.example.com",
+    "description": "API docs",
+    "tags": null
   }
 ]
 #+END_SRC
@@ -237,6 +272,12 @@ If you encounter key binding conflicts:
 - Ensure GPG is properly configured and your key is available
 - Check that ~epa-file~ is working: try opening any ~.gpg~ file
 - Verify GPG agent is running if using GUI Emacs
+
+** Invalid Bookmark Errors
+ESB now validates bookmarks and will skip invalid entries:
+- URLs must start with http:// or https://
+- Tags must be strings if present
+- Use ~M-x esb-reload-bookmarks~ if you manually edit the file (NOT RECOMMENDED!)
 
 * License
 
