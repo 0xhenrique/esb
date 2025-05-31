@@ -45,14 +45,20 @@
   "Read and decrypt bookmarks from file."
   (esb--ensure-epa-setup)
   (if (file-exists-p esb-bookmarks-file)
-      (with-temp-buffer
-        (insert-file-contents esb-bookmarks-file)
-        (condition-case err
-            (json-parse-string (buffer-string) :array-type 'list :object-type 'alist)
-          (json-error
-           (message "Error parsing bookmarks file: %s" err)
-           nil)))
-    nil))
+	  (with-temp-buffer
+		(insert-file-contents esb-bookmarks-file)
+		(let ((content (string-trim (buffer-string))))
+		  (if (string-empty-p content)
+			  '()
+			(condition-case err
+				(let ((parsed (json-parse-string content :array-type 'list :object-type 'alist)))
+				  (if (eq parsed :null)
+					  '()
+					parsed))
+			  (json-error
+			   (message "Error parsing bookmarks file: %s" err)
+			   '())))))
+	'()))
 
 (defun esb--write-bookmarks (bookmarks)
   "Encrypt and write BOOKMARKS to file."
@@ -177,6 +183,15 @@
       (message "Bookmark file already exists at: %s" esb-bookmarks-file)
     (esb--write-bookmarks '())
     (message "Initialized empty bookmark file at: %s" esb-bookmarks-file)))
+
+;;;###autoload
+(defun esb-flush-cache ()
+  "Flush the bookmark cache and force reload from file."
+  (interactive)
+  (setq esb-bookmarks-cache nil)
+  (setq esb-cache-dirty nil)
+  (message "Bookmark cache flushed"))
+
 
 
 
