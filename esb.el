@@ -181,7 +181,7 @@
 
 (defun esb--bookmark-exists-p (url)
   "Check if bookmark with URL already exists."
-  (not (null (esb--find-bookmark-by-url url))))
+  (esb--find-bookmark-by-url url))
 
 (defun esb--get-all-tags ()
   "Get all unique tags from bookmarks."
